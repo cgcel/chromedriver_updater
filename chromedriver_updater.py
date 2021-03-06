@@ -4,7 +4,8 @@
 
 import requests
 import subprocess
-from config import download_url, chrome_location
+import re
+from config import index_url, download_url, chrome_location
 
 
 class DriverUpdater(object):
@@ -31,7 +32,12 @@ class DriverUpdater(object):
 
         global download_url
 
-        target_url = download_url.format(self.current_version)
+        r = requests.get(index_url) # 获取版本号列表
+        pattern = re.compile(r'{}[0-9\.]+'.format(self.current_version.split('.')[0])) # 根据当前浏览器版本号匹配驱动版本号
+        driver_version = pattern.findall(r.text)[-1]
+        print("Driver Version: {}".format(driver_version))
+
+        target_url = download_url.format(driver_version)
         # print(target_url)
         r = requests.get(url=target_url)
 
