@@ -5,7 +5,16 @@
 import requests
 import subprocess
 import re
-from config import index_url, download_url, chrome_location
+
+
+chrome_location = {
+    r"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    r"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+}
+
+index_url = "http://chromedriver.storage.googleapis.com/?delimiter=/&prefix="
+
+download_url = "http://chromedriver.storage.googleapis.com/{}/chromedriver_win32.zip"
 
 
 class DriverUpdater(object):
@@ -32,8 +41,10 @@ class DriverUpdater(object):
 
         global download_url
 
-        r = requests.get(index_url) # 获取版本号列表
-        pattern = re.compile(r'{}[0-9\.]+'.format(self.current_version.split('.')[0])) # 根据当前浏览器版本号匹配驱动版本号
+        r = requests.get(index_url)  # 获取版本号列表
+        # 根据当前浏览器版本号匹配驱动版本号
+        pattern = re.compile(
+            r'{}[0-9\.]+'.format(self.current_version.split('.')[0]))
         driver_version = pattern.findall(r.text)[-1]
         print("Driver Version: {}".format(driver_version))
 
