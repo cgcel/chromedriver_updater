@@ -5,6 +5,8 @@
 import requests
 import subprocess
 import re
+import zipfile
+import os
 
 
 chrome_location = {
@@ -20,7 +22,6 @@ download_url = "http://chromedriver.storage.googleapis.com/{}/chromedriver_win32
 class DriverUpdater(object):
 
     def __init__(self):
-
         self.get_version()
 
     def get_version(self):
@@ -37,7 +38,7 @@ class DriverUpdater(object):
                     part, self.current_version))
                 break
 
-    def download_driver(self):
+    def download_driver(self, *location):
 
         global download_url
 
@@ -52,15 +53,32 @@ class DriverUpdater(object):
         # print(target_url)
         r = requests.get(url=target_url)
 
-        with open("chromedriver_win32.zip", "wb") as file:
-            print("开始下载...", end="")
-            file.write(r.content)
-            print("下载完成")
+        if len(location) == 0:
+            file_name = "chromedriver_win32.zip"
+            with open(file_name, "wb") as file:
+                print("开始下载...", end="")
+                file.write(r.content)
+                print("下载完成")
+                zipfile.ZipFile(file_name).extractall()
+                print("解压完成")
+
+        elif len(location) == 1:
+            file_name = location[0] + "chromedriver_win32.zip"
+            with open(file_name, "wb") as file:
+                print("开始下载...", end="")
+                file.write(r.content)
+                print("下载完成")
+                zipfile.ZipFile(file_name).extractall()
+                print("解压完成")
+            
+        else:
+            print("只能输入一个路径!")
 
 
 def main():
     updater = DriverUpdater()
     updater.download_driver()
+    # updater.download_driver("..\\test\\")
 
     subprocess.Popen("pause", shell=True)
 
