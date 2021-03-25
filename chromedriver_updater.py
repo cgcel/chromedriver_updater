@@ -68,7 +68,7 @@ class DriverUpdater(object):
                 print("开始下载...", end="")
                 file.write(r.content)
                 print("下载完成")
-                zipfile.ZipFile(file_name).extractall()
+                zipfile.ZipFile(file_name).extractall(location[0])
                 print("解压完成")
             
         else:
@@ -77,8 +77,8 @@ class DriverUpdater(object):
 
 def main():
     updater = DriverUpdater()
-    updater.download_driver()
-    # updater.download_driver("..\\test\\")
+    # updater.download_driver()
+    updater.download_driver("drivers\\")
 
     subprocess.Popen("pause", shell=True)
 
