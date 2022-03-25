@@ -2,11 +2,11 @@
 # author: elvin
 
 
-import requests
-import subprocess
 import re
+import subprocess
 import zipfile
 
+import requests
 
 chrome_location = {
     r"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
@@ -16,12 +16,16 @@ chrome_location = {
 index_url = "http://chromedriver.storage.googleapis.com/?delimiter=/&prefix="
 download_url = "http://chromedriver.storage.googleapis.com/{}/chromedriver_win32.zip"
 
-mirror_index_url = "http://npm.taobao.org/mirrors/chromedriver/"
+mirror_index_url = "https://registry.npmmirror.com/-/binary/chromedriver/"
+mirror_download_url = "https://registry.npmmirror.com/-/binary/chromedriver/{}chromedriver_win32.zip"
 
 
 class DriverUpdater(object):
 
     def __init__(self):
+        self.headers = {
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36'
+        }
         self.get_version()
 
     def get_version(self):
@@ -79,13 +83,18 @@ class DriverUpdater(object):
             self.mirror_download(*path)
 
     def mirror_download(self, *path):
-        r = requests.get(mirror_index_url, timeout=5)
-        pattern = re.compile(
-            r"/mirrors/chromedriver/{}[0-9\.]+".format(self.current_version.split('.')[0]))
-        result = pattern.findall(r.text)[-1]
-        mirror_download_url = mirror_index_url + \
-            '{}/chromedriver_win32.zip'.format(result.split('/')[-1])
-        r = requests.get(mirror_download_url)
+        r = requests.get(mirror_index_url, timeout=5, headers=self.headers)
+        result = r.json()
+        target_version = ''
+        version_list = self.current_version.split('.')[:-1]
+        version = '.'.join(version_list)
+        for i in result:
+            if version in i['name']:
+                if i['type'] == 'dir':
+                    target_version = i['name']
+        target_download_url = mirror_download_url.format(target_version)
+        print(target_download_url)
+        r = requests.get(target_download_url)
 
         if len(path) == 0:
             file_name = "chromedriver_win32.zip"
@@ -111,7 +120,7 @@ class DriverUpdater(object):
 
 def main():
     updater = DriverUpdater()
-    updater.download()
+    updater.mirror_download()
     # updater.download(".\\drivers")
 
 
